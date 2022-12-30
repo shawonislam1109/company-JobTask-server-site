@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config();
@@ -29,6 +29,37 @@ async function run() {
             const result = await DataCollection.insertOne(query)
             res.send(result)
         })
+
+        app.get('/userData', async (req, res) => {
+            const query = {};
+            const allDAta = await DataCollection.find(query).toArray();
+            res.send(allDAta);
+        })
+
+        app.get('/userDatas', async (req, res) => {
+            const email = req.query.email;
+            const query = { email }
+            const AllDAta = await DataCollection.find(query).toArray();
+            res.send(AllDAta)
+        })
+
+        app.put('/UpdateData/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const updateDAta = req.body;
+            const option = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    name: updateDAta.name,
+                    select: updateDAta.select,
+                    terms_condition: updateDAta.terms_condition,
+                    email: updateDAta.email
+                }
+            }
+            const result = await DataCollection.updateOne(query, updateDoc, option)
+            res.send(result)
+        })
+
     }
     finally {
 
